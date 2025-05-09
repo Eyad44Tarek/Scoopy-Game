@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>لعبة سكوبى 🐶</title>
+  <style>
+    body {
+      margin: 0;
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+      background-color: #fefefe;
+    }
+    h1 {
+      color: #4CAF50;
+    }
+    #gameCanvas {
+      background-color: #dff9fb;
+      border: 4px solid #333;
+      margin-top: 10px;
+    }
+    #startScreen, #gameOverScreen {
+      display: none;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="startScreen">
+    <h1>🐾 لعبة سكوبى 🐾</h1>
+    <p>اجمع العظام وتجنب العقبات!</p>
+    <input type="text" id="petName" placeholder="اسم كلبك" />
+    <br><br>
+    <button onclick="startGame()">ابدأ اللعب</button>
+  </div>
+
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <div id="gameOverScreen">
+    <h2>🎉 تهانينا!</h2>
+    <p>لقد حصلت على عرض خاص!</p>
+    <p>أعجب بصفحتنا على الفيسبوك وأرسل لقطة الشاشة للحصول على العرض 🎁</p>
+    <button onclick="location.reload()">العب مرة أخرى</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const dogSize = 40;
+    let dog = { x: 180, y: 300, name: "سكوبى" };
+    let bones = [];
+    let obstacles = [];
+    let score = 0;
+    let timer = 60;
+    let gameRunning = false;
+
+    document.getElementById("startScreen").style.display = "block";
+    document.getElementById("gameCanvas").style.display = "none";
+
+    function startGame() {
+      const nameInput = document.getElementById("petName").value;
+      if (nameInput) dog.name = nameInput;
+
+      document.getElementById("startScreen").style.display = "none";
+      document.getElementById("gameCanvas").style.display = "inline";
+      gameRunning = true;
+      bones = [];
+      obstacles = [];
+      score = 0;
+      timer = 60;
+      setInterval(() => timer > 0 ? timer-- : null, 1000);
+      requestAnimationFrame(gameLoop);
+    }
+
+    function drawDog() {
+      ctx.fillStyle = "brown";
+      ctx.fillRect(dog.x, dog.y, dogSize, dogSize);
+    }
+
+    function drawBone(bone) {
+      ctx.fillStyle = "gold";
+      ctx.fillRect(bone.x, bone.y, 20, 20);
+    }
+
+    function drawObstacle(ob) {
+      ctx.fillStyle = "black";
+      ctx.fillRect(ob.x, ob.y, 30, 30);
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawDog();
+
+      if (Math.random() < 0.02) bones.push({ x: Math.random() * 380, y: 0 });
+      if (Math.random() < 0.015) obstacles.push({ x: Math.random() * 370, y: 0 });
+
+      for (let bone of bones) {
+        bone.y += 2;
+        drawBone(bone);
+        if (bone.y > canvas.height) continue;
+        if (isColliding(dog, bone, 20)) {
+          score++;
+          bone.y = 9999;
+          playSound("ding");
+        }
+      }
+
+      for (let ob of obstacles) {
+        ob.y += 3;
+        drawObstacle(ob);
+        if (isColliding(dog, ob, 30)) {
+          endGame();
+          return;
+        }
+      }
+
+      ctx.fillStyle = "#333";
+      ctx.fillText("الاسم: " + dog.name, 10, 15);
+      ctx.fillText("النقاط: " + score, 10, 30);
+      ctx.fillText("الوقت: " + timer, 10, 45);
+
+      if (timer <= 0) return endGame();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    function isColliding(a, b, size) {
+      return a.x < b.x + size && a.x + dogSize > b.x && a.y < b.y + size && a.y + dogSize > b.y;
+    }
+
+    function endGame() {
+      gameRunning = false;
+      document.getElementById("gameCanvas").style.display = "none";
+      document.getElementById("gameOverScreen").style.display = "block";
+    }
+
+    function playSound(type) {
+      const audio = new Audio();
+      if (type === "ding") audio.src = "https://www.soundjay.com/buttons/sounds/button-3.mp3";
+      audio.play();
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (!gameRunning) return;
+      if (e.key === "ArrowLeft") dog.x -= 10;
+      if (e.key === "ArrowRight") dog.x += 10;
+    });
+  </script>
+</body>
+</html>
