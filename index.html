@@ -2,155 +2,652 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>لعبة سكوبى 🐶</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لعبة سكوبي 🐶</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary-color: #FFA500;
+      --secondary-color: #FF8C00;
+      --accent-color: #FF6347;
+      --light-color: #FFF8DC;
+      --dark-color: #8B4513;
+    }
+    
     body {
-      margin: 0;
+      background: linear-gradient(135deg, #f5f7fa 0%, #ffe4b5 100%);
+      font-family: 'Tajawal', sans-serif;
+      min-height: 100vh;
+      padding: 20px;
       text-align: center;
-      font-family: 'Arial', sans-serif;
-      background-color: #fefefe;
     }
+    
+    .container {
+      max-width: 500px;
+    }
+    
     h1 {
-      color: #4CAF50;
+      color: var(--dark-color);
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
     }
-    #gameCanvas {
-      background-color: #dff9fb;
-      border: 4px solid #333;
-      margin-top: 10px;
+    
+    canvas {
+      border-radius: 15px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+      margin: 20px auto;
+      display: block;
+      background: linear-gradient(to bottom, #87CEEB, #E0F7FA);
+      border: 3px solid var(--dark-color);
     }
-    #startScreen, #gameOverScreen {
+    
+    .btn {
+      font-size: 1.1rem;
+      padding: 10px 25px;
+      border-radius: 50px;
+      margin: 8px;
+      font-weight: bold;
+      transition: all 0.3s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+    
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+    
+    .screen {
       display: none;
+      animation: fadeIn 0.5s ease-in-out;
+      padding: 20px;
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
-    button {
+    
+    .screen.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    #petName {
+      max-width: 300px;
+      margin: 15px auto;
+      text-align: center;
+      border: 2px solid var(--dark-color);
+      border-radius: 50px;
+      padding: 10px 15px;
+    }
+    
+    #scoreDisplay {
+      background-color: rgba(255,255,255,0.8);
+      border-radius: 50px;
       padding: 10px 20px;
-      font-size: 18px;
-      margin-top: 15px;
-      cursor: pointer;
+      font-weight: bold;
+      display: inline-block;
+      margin: 10px auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    #instructions {
+      background-color: #F8F9FA;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 20px 0;
+      border-left: 5px solid var(--accent-color);
+    }
+    
+    .instruction-step {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      text-align: right;
+    }
+    
+    .instruction-icon {
+      font-size: 24px;
+      margin-left: 10px;
+    }
+    
+    .highlight {
+      color: var(--accent-color);
+      font-weight: bold;
+    }
+    
+    .dog-icon {
+      font-size: 1.5em;
+      vertical-align: middle;
+    }
+    
+    #rewardMessage {
+      font-size: 1.2rem;
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    
+    @media (max-width: 576px) {
+      canvas {
+        width: 100%;
+        height: auto;
+      }
+      
+      .btn {
+        width: 100%;
+        margin: 5px 0;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="startScreen">
-    <h1>🐾 لعبة سكوبى 🐾</h1>
-    <p>اجمع العظام وتجنب العقبات!</p>
-    <input type="text" id="petName" placeholder="اسم كلبك" />
-    <br><br>
-    <button onclick="startGame()">ابدأ اللعب</button>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen active">
+      <h1><span class="dog-icon">🐶</span> لعبة سكوبى المتطورة <span class="dog-icon">🐾</span></h1>
+      <p class="lead">ساعد كلبك المفضل في جمع العظام وتجنب العقبات!</p>
+      
+      <div id="instructions">
+        <h4>كيفية اللعب:</h4>
+        <div class="instruction-step">
+          <span>استخدم <span class="highlight">السهم الأيمن ←</span> و <span class="highlight">السهم الأيسر →</span> للحركة</span>
+          <span class="instruction-icon">↔️</span>
+        </div>
+        <div class="instruction-step">
+          <span>اجمع <span class="highlight">العظام</span> لزيادة نقاطك</span>
+          <span class="instruction-icon">🦴</span>
+        </div>
+        <div class="instruction-step">
+          <span>تجنب <span class="highlight">الصخور</span> للحفاظ على صحتك</span>
+          <span class="instruction-icon">🪨</span>
+        </div>
+        <div class="instruction-step">
+          <span>لديك <span class="highlight">60 ثانية</span> لتحقيق أعلى نتيجة</span>
+          <span class="instruction-icon">⏱️</span>
+        </div>
+      </div>
+      
+      <input type="text" id="petName" class="form-control" placeholder="أدخل اسم كلبك (اختياري)">
+      <button id="startButton" class="btn btn-primary">ابدأ اللعب</button>
+      <button id="creditsButton" class="btn btn-secondary">عن اللعبة</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+      <canvas id="gameCanvas" width="400" height="500"></canvas>
+      <div id="scoreDisplay">الوقت: 60 | النقاط: 0 | الصحة: ❤️❤️❤️</div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen">
+      <h2><span class="dog-icon">🏆</span> أحسنت <span id="finalPetName"></span>! <span class="dog-icon">🏆</span></h2>
+      <p class="lead">لقد جمعت <span id="finalScore" class="highlight">0</span> عظمة!</p>
+      <p id="rewardMessage" class="fw-bold"></p>
+      <button id="playAgainButton" class="btn btn-primary">العب مجدداً</button>
+      <button id="backToMenuButton" class="btn btn-secondary">العودة للقائمة</button>
+    </div>
+
+    <!-- Credits Screen -->
+    <div id="creditsScreen" class="screen">
+      <h3>عن لعبة سكوبى</h3>
+      <p class="lead">لعبة ممتعة لكل محبي الكلاب!</p>
+      <div class="alert alert-info">
+        <p>تم تطوير هذه اللعبة من قبل المستشفى البيطري الكندي</p>
+        <p>استمتع باللعبة واحصل على خصومات وعروض حصرية!</p>
+      </div>
+      <button id="backButton" class="btn btn-primary">العودة</button>
+    </div>
   </div>
 
-  <canvas id="gameCanvas" width="400" height="400"></canvas>
-
-  <div id="gameOverScreen">
-    <h2>🎉 تهانينا!</h2>
-    <p>لقد حصلت على عرض خاص!</p>
-    <p>أعجب بصفحتنا على الفيسبوك وأرسل لقطة الشاشة للحصول على العرض 🎁</p>
-    <button onclick="location.reload()">العب مرة أخرى</button>
-  </div>
+  <!-- Sound Effects -->
+  <audio id="bgMusic" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="boneSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="barkSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-dog-barking-twice-1.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="gameOverSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-sad-game-over-trombone-471.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="successSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="obstacleSound">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-quick-jump-arcade-game-239.mp3" type="audio/mpeg">
+  </audio>
 
   <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+    document.addEventListener('DOMContentLoaded', function() {
+      // Game elements
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      
+      // Screens
+      const startScreen = document.getElementById("startScreen");
+      const gameScreen = document.getElementById("gameScreen");
+      const gameOverScreen = document.getElementById("gameOverScreen");
+      const creditsScreen = document.getElementById("creditsScreen");
+      
+      // Buttons
+      const startButton = document.getElementById("startButton");
+      const creditsButton = document.getElementById("creditsButton");
+      const playAgainButton = document.getElementById("playAgainButton");
+      const backToMenuButton = document.getElementById("backToMenuButton");
+      const backButton = document.getElementById("backButton");
+      
+      // Display elements
+      const scoreDisplay = document.getElementById("scoreDisplay");
+      const finalScore = document.getElementById("finalScore");
+      const finalPetName = document.getElementById("finalPetName");
+      const rewardMessage = document.getElementById("rewardMessage");
+      const petNameInput = document.getElementById("petName");
+      
+      // Audio elements
+      const bgMusic = document.getElementById("bgMusic");
+      const boneSound = document.getElementById("boneSound");
+      const barkSound = document.getElementById("barkSound");
+      const gameOverSound = document.getElementById("gameOverSound");
+      const successSound = document.getElementById("successSound");
+      const obstacleSound = document.getElementById("obstacleSound");
 
-    const dogSize = 40;
-    let dog = { x: 180, y: 300, name: "سكوبى" };
-    let bones = [];
-    let obstacles = [];
-    let score = 0;
-    let timer = 60;
-    let gameRunning = false;
+      // Game settings
+      const DOG_WIDTH = 60;
+      const DOG_HEIGHT = 40;
+      const BONE_WIDTH = 30;
+      const BONE_HEIGHT = 30;
+      const OBSTACLE_SIZE = 40;
+      const GAME_DURATION = 60; // 60 seconds
+      
+      // Game state
+      let dog = {
+        x: canvas.width / 2 - DOG_WIDTH / 2,
+        y: canvas.height - DOG_HEIGHT - 20,
+        name: "سكوبى",
+        health: 3,
+        frame: 0
+      };
+      
+      let bones = [];
+      let obstacles = [];
+      let score = 0;
+      let timeLeft = GAME_DURATION;
+      let gameRunning = false;
+      let gameInterval;
+      let timerInterval;
+      let lastBoneTime = 0;
+      let lastObstacleTime = 0;
+      let lastMoveTime = 0;
 
-    document.getElementById("startScreen").style.display = "block";
-    document.getElementById("gameCanvas").style.display = "none";
+      // Load images
+      const dogImg = new Image();
+      dogImg.src = 'https://cdn-icons-png.flaticon.com/512/616/616408.png';
+      
+      const boneImg = new Image();
+      boneImg.src = 'https://opengameart.org/sites/default/files/WebMeat03.png';
+      
+      const obstacleImg = new Image();
+      obstacleImg.src = 'https://opengameart.org/sites/default/files/a_0.png';
 
-    function startGame() {
-      const nameInput = document.getElementById("petName").value;
-      if (nameInput) dog.name = nameInput;
-
-      document.getElementById("startScreen").style.display = "none";
-      document.getElementById("gameCanvas").style.display = "inline";
-      gameRunning = true;
-      bones = [];
-      obstacles = [];
-      score = 0;
-      timer = 60;
-      setInterval(() => timer > 0 ? timer-- : null, 1000);
-      requestAnimationFrame(gameLoop);
-    }
-
-    function drawDog() {
-      ctx.fillStyle = "brown";
-      ctx.fillRect(dog.x, dog.y, dogSize, dogSize);
-    }
-
-    function drawBone(bone) {
-      ctx.fillStyle = "gold";
-      ctx.fillRect(bone.x, bone.y, 20, 20);
-    }
-
-    function drawObstacle(ob) {
-      ctx.fillStyle = "black";
-      ctx.fillRect(ob.x, ob.y, 30, 30);
-    }
-
-    function gameLoop() {
-      if (!gameRunning) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawDog();
-
-      if (Math.random() < 0.02) bones.push({ x: Math.random() * 380, y: 0 });
-      if (Math.random() < 0.015) obstacles.push({ x: Math.random() * 370, y: 0 });
-
-      for (let bone of bones) {
-        bone.y += 2;
-        drawBone(bone);
-        if (bone.y > canvas.height) continue;
-        if (isColliding(dog, bone, 20)) {
-          score++;
-          bone.y = 9999;
-          playSound("ding");
+      // Event listeners for buttons
+      startButton.addEventListener('click', startGame);
+      creditsButton.addEventListener('click', showCredits);
+      playAgainButton.addEventListener('click', playAgain);
+      backToMenuButton.addEventListener('click', backToMenu);
+      backButton.addEventListener('click', hideCredits);
+      
+      // Screen management functions
+      function showScreen(screen) {
+        [startScreen, gameScreen, gameOverScreen, creditsScreen].forEach(s => {
+          s.classList.remove('active');
+        });
+        screen.classList.add('active');
+      }
+      
+      function showCredits() {
+        showScreen(creditsScreen);
+      }
+      
+      function hideCredits() {
+        showScreen(startScreen);
+      }
+      
+      // Game control functions
+      function startGame() {
+        // Set dog name
+        if (petNameInput.value.trim() !== '') {
+          dog.name = petNameInput.value.trim();
+        } else {
+          dog.name = "سكوبى";
+        }
+        
+        // Reset game state
+        resetGameState();
+        
+        // Show game screen
+        showScreen(gameScreen);
+        gameRunning = true;
+        
+        // Play sounds
+        barkSound.currentTime = 0;
+        barkSound.play();
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(e => console.log("Autoplay prevented:", e));
+        
+        // Start game loop
+        gameInterval = setInterval(gameLoop, 20);
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+      
+      function resetGameState() {
+        score = 0;
+        timeLeft = GAME_DURATION;
+        dog.health = 3;
+        dog.x = canvas.width / 2 - DOG_WIDTH / 2;
+        dog.y = canvas.height - DOG_HEIGHT - 20;
+        bones = [];
+        obstacles = [];
+        updateScoreDisplay();
+      }
+      
+      function playAgain() {
+        showScreen(gameScreen);
+        startGame();
+      }
+      
+      function backToMenu() {
+        showScreen(startScreen);
+      }
+      
+      function updateTimer() {
+        if (timeLeft > 0 && gameRunning) {
+          timeLeft--;
+          updateScoreDisplay();
+          
+          if (timeLeft <= 0) {
+            endGame(true);
+          }
         }
       }
-
-      for (let ob of obstacles) {
-        ob.y += 3;
-        drawObstacle(ob);
-        if (isColliding(dog, ob, 30)) {
-          endGame();
-          return;
+      
+      function updateScoreDisplay() {
+        let healthDisplay = '';
+        for (let i = 0; i < 3; i++) {
+          healthDisplay += i < dog.health ? '❤️' : '🖤';
         }
+        scoreDisplay.textContent = `الوقت: ${timeLeft} | النقاط: ${score} | الصحة: ${healthDisplay}`;
       }
 
-      ctx.fillStyle = "#333";
-      ctx.fillText("الاسم: " + dog.name, 10, 15);
-      ctx.fillText("النقاط: " + score, 10, 30);
-      ctx.fillText("الوقت: " + timer, 10, 45);
+      function gameLoop() {
+        if (!gameRunning) return;
 
-      if (timer <= 0) return endGame();
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw background
+        drawBackground();
+        
+        // Draw dog
+        drawDog();
 
-      requestAnimationFrame(gameLoop);
-    }
+        // Generate game objects
+        generateObjects();
+        
+        // Update and draw bones
+        updateBones();
+        
+        // Update and draw obstacles
+        updateObstacles();
+      }
+      
+      function drawBackground() {
+        // Sky gradient
+        const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        skyGradient.addColorStop(0, '#87CEEB');
+        skyGradient.addColorStop(1, '#E0F7FA');
+        ctx.fillStyle = skyGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Grass
+        ctx.fillStyle = '#7CFC00';
+        ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+        
+        // Clouds
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        for (let i = 0; i < 3; i++) {
+          const x = (Date.now() / 2000 + i * 100) % (canvas.width + 100) - 50;
+          ctx.beginPath();
+          ctx.arc(x, 50, 20, 0, Math.PI * 2);
+          ctx.arc(x + 15, 45, 25, 0, Math.PI * 2);
+          ctx.arc(x + 35, 50, 20, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      
+      function drawDog() {
+        dog.frame++;
+        const tailWag = Math.sin(dog.frame * 0.1) * 5;
+        
+        if (dogImg.complete) {
+          ctx.save();
+          ctx.translate(dog.x + DOG_WIDTH / 2, dog.y + DOG_HEIGHT / 2);
+          ctx.rotate(tailWag * 0.05);
+          ctx.drawImage(dogImg, -DOG_WIDTH / 2, -DOG_HEIGHT / 2, DOG_WIDTH, DOG_HEIGHT);
+          ctx.restore();
+        } else {
+          // Fallback drawing
+          ctx.fillStyle = '#8B4513';
+          ctx.beginPath();
+          ctx.roundRect(dog.x, dog.y, DOG_WIDTH, DOG_HEIGHT, 10);
+          ctx.fill();
+          
+          // Eyes
+          ctx.fillStyle = 'white';
+          ctx.beginPath();
+          ctx.arc(dog.x + 15, dog.y + 15, 5, 0, Math.PI * 2);
+          ctx.arc(dog.x + 45, dog.y + 15, 5, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Mouth
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(dog.x + 30, dog.y + 25, 10, 0, Math.PI);
+          ctx.stroke();
+        }
+      }
+      
+      function generateObjects() {
+        const now = Date.now();
+        
+        // Generate bones (every 0.8-1.5 seconds)
+        if (now - lastBoneTime > 800 + Math.random() * 700) {
+          bones.push({
+            x: Math.random() * (canvas.width - BONE_WIDTH),
+            y: -BONE_HEIGHT,
+            speed: 3 + score / 20,
+            collected: false
+          });
+          lastBoneTime = now;
+        }
+        
+        // Generate obstacles (every 1.5-3 seconds)
+        if (now - lastObstacleTime > 1500 + Math.random() * 1500) {
+          obstacles.push({
+            x: Math.random() * (canvas.width - OBSTACLE_SIZE),
+            y: -OBSTACLE_SIZE,
+            speed: 4 + score / 20
+          });
+          lastObstacleTime = now;
+        }
+      }
+      
+      function updateBones() {
+        for (let i = bones.length - 1; i >= 0; i--) {
+          const bone = bones[i];
+          
+          // Update position
+          bone.y += bone.speed;
+          
+          // Draw bone
+          if (boneImg.complete) {
+            ctx.drawImage(boneImg, bone.x, bone.y, BONE_WIDTH, BONE_HEIGHT);
+          } else {
+            // Fallback drawing
+            ctx.fillStyle = '#F5F5DC';
+            ctx.beginPath();
+            ctx.roundRect(bone.x + 5, bone.y + 5, BONE_WIDTH - 10, BONE_HEIGHT - 10, 5);
+            ctx.fill();
+          }
+          
+          // Check if off screen
+          if (bone.y > canvas.height) {
+            bones.splice(i, 1);
+            continue;
+          }
+          
+          // Check collision with dog
+          if (isColliding(dog, bone, BONE_WIDTH / 2)) {
+            score++;
+            boneSound.currentTime = 0;
+            boneSound.play();
+            bones.splice(i, 1);
+            updateScoreDisplay();
+          }
+        }
+      }
+      
+      function updateObstacles() {
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          const obstacle = obstacles[i];
+          
+          // Update position
+          obstacle.y += obstacle.speed;
+          
+          // Draw obstacle
+          if (obstacleImg.complete) {
+            ctx.drawImage(obstacleImg, obstacle.x, obstacle.y, OBSTACLE_SIZE, OBSTACLE_SIZE);
+          } else {
+            // Fallback drawing
+            ctx.fillStyle = '#7f8c8d';
+            ctx.beginPath();
+            ctx.roundRect(obstacle.x, obstacle.y, OBSTACLE_SIZE, OBSTACLE_SIZE, 5);
+            ctx.fill();
+          }
+          
+          // Check if off screen
+          if (obstacle.y > canvas.height) {
+            obstacles.splice(i, 1);
+            continue;
+          }
+          
+          // Check collision with dog
+          if (isColliding(dog, obstacle, OBSTACLE_SIZE / 2)) {
+            dog.health--;
+            obstacleSound.currentTime = 0;
+            obstacleSound.play();
+            obstacles.splice(i, 1);
+            updateScoreDisplay();
+            
+            if (dog.health <= 0) {
+              endGame(false);
+            }
+          }
+        }
+      }
+      
+      function isColliding(obj1, obj2, size) {
+        return obj1.x < obj2.x + size &&
+               obj1.x + DOG_WIDTH > obj2.x &&
+               obj1.y < obj2.y + size &&
+               obj1.y + DOG_HEIGHT > obj2.y;
+      }
+      
+      function endGame(timeUp) {
+        gameRunning = false;
+        clearInterval(gameInterval);
+        clearInterval(timerInterval);
+        bgMusic.pause();
+        
+        // Set final score and name
+        finalScore.textContent = score;
+        finalPetName.textContent = dog.name;
+        
+        // Determine reward message
+        if (timeUp) {
+          if (score < 10) {
+            rewardMessage.textContent = "حاول مرة أخرى! يمكنك فعل أفضل من ذلك!";
+            rewardMessage.style.color = "#e74c3c";
+          } else if (score < 25) {
+            rewardMessage.textContent = "أحسنت! كلبك سعيد بهذه النتيجة!";
+            rewardMessage.style.color = "#2ecc71";
+          } else if (score < 40) {
+            rewardMessage.textContent = "رائع! كلبك فخور بك! 🏅";
+            rewardMessage.style.color = "#3498db";
+            successSound.play();
+          } else {
+            rewardMessage.textContent = "مذهل! أنت خبير في جمع العظام! 🏆";
+            rewardMessage.style.color = "#f39c12";
+            successSound.play();
+          }
+        } else {
+          rewardMessage.textContent = "انتبه للعقبات في المرة القادمة!";
+          rewardMessage.style.color = "#e74c3c";
+          gameOverSound.play();
+        }
+        
+        showScreen(gameOverScreen);
+      }
 
-    function isColliding(a, b, size) {
-      return a.x < b.x + size && a.x + dogSize > b.x && a.y < b.y + size && a.y + dogSize > b.y;
-    }
+      // Keyboard controls
+      document.addEventListener("keydown", function(e) {
+        if (!gameRunning) return;
+        
+        const now = Date.now();
+        if (now - lastMoveTime < 50) return; // Limit movement speed
+        lastMoveTime = now;
+        
+        if (e.key === "ArrowRight" && dog.x < canvas.width - DOG_WIDTH) {
+          dog.x += 20;
+        } else if (e.key === "ArrowLeft" && dog.x > 0) {
+          dog.x -= 20;
+        }
+      });
 
-    function endGame() {
-      gameRunning = false;
-      document.getElementById("gameCanvas").style.display = "none";
-      document.getElementById("gameOverScreen").style.display = "block";
-    }
-
-    function playSound(type) {
-      const audio = new Audio();
-      if (type === "ding") audio.src = "https://www.soundjay.com/buttons/sounds/button-3.mp3";
-      audio.play();
-    }
-
-    document.addEventListener("keydown", function (e) {
-      if (!gameRunning) return;
-      if (e.key === "ArrowLeft") dog.x -= 10;
-      if (e.key === "ArrowRight") dog.x += 10;
+      // Touch controls for mobile
+      canvas.addEventListener("touchstart", handleTouch);
+      canvas.addEventListener("touchmove", handleTouch);
+      
+      function handleTouch(e) {
+        if (!gameRunning) return;
+        e.preventDefault();
+        const touchX = e.touches[0].clientX - canvas.getBoundingClientRect().left;
+        
+        if (touchX > dog.x + DOG_WIDTH / 2 && dog.x < canvas.width - DOG_WIDTH) {
+          dog.x += 25;
+        } else if (touchX < dog.x + DOG_WIDTH / 2 && dog.x > 0) {
+          dog.x -= 25;
+        }
+      }
+      
+      // Try to play background music on page load
+      bgMusic.play().catch(e => console.log("Autoplay prevented:", e));
     });
   </script>
 </body>
